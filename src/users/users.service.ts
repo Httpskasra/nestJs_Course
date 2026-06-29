@@ -1,7 +1,12 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UUID } from 'crypto';
 
 @Injectable()
 export class UsersService {
@@ -13,24 +18,50 @@ export class UsersService {
       },
     });
     if (existUser) {
-      throw new ConflictException("این ایمیل وجود دارد")
-    };
+      throw new ConflictException('این ایمیل وجود دارد');
+    }
     return await this.prisma.user.create({ data: createUserDto });
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll() {
+    return await this.prisma.user.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+      select: {
+        id: false,
+        name: true,
+        email: true,
+        createAt: false,
+        updateAt: false,
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: UUID) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    if (!user) {
+      throw new NotFoundException('کاربر مورد نظر پیدا نشد');
+    }
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  update(id: UUID, updateUserDto: UpdateUserDto) {
+    return this.prisma.user.update({
+      where: {id},
+      data: updateUserDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  remove(id: UUID) {
+    return this.prisma.user.delete({
+      where: {
+        id: id,
+      },
+    });
   }
 }
