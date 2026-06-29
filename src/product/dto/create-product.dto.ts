@@ -12,7 +12,7 @@ export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(200)
-  tilte: string;
+  title: string;
 
   @IsOptional()
   @IsString()
