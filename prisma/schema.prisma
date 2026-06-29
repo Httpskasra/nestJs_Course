@@ -21,3 +21,12 @@ model User {
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt
 }
+model Product{
+  id String  @id @default(uuid())
+  title String
+  description  String? 
+  price    Decimal @db.Decimal(10,2)  
+  stock    Int @default(0)
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+}
