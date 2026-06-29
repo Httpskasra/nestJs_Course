@@ -1,15 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    private readonly prisma:PrismaService
-  ){}
-  create(createUserDto: CreateUserDto) {
-    return this.prisma.user.create({data:createUserDto})
+  constructor(private readonly prisma: PrismaService) {}
+  async create(createUserDto: CreateUserDto) {
+    const existUser = await this.prisma.user.findUnique({
+      where: {
+        email: createUserDto.email,
+      },
+    });
+    if (existUser) {
+      throw new ConflictException("این ایمیل وجود دارد")
+    };
+    return await this.prisma.user.create({ data: createUserDto });
   }
 
   findAll() {
